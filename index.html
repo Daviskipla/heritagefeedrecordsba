@@ -1,109 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heritage Fishing Co. — Feed Tracker</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 { font-family: 'DM Serif Display', serif; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-    table, th, td { border: 1px solid #ccc; }
-    th, td { padding: 10px; text-align: left; }
-    form { margin-bottom: 20px; }
-    input, button { padding: 8px; margin: 5px 0; width: 100%; }
-    button { cursor: pointer; background-color: #007BFF; color: #fff; border: none; }
-    button:hover { background-color: #0056b3; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heritage Fishing Co. — Feed Tracker</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  h2 { margin-top: 40px; }
+  form { margin-bottom: 20px; }
+  input, button { margin: 5px 0; padding: 8px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background: #eee; }
+</style>
 </head>
 <body>
-  <h1>Heritage Fishing Co. — Feed Tracker</h1>
 
-  <!-- Display Stock Table -->
-  <h2>Current Feed Stock</h2>
-  <table id="stockTable">
-    <thead>
-      <tr>
-        <th>Feed Name</th>
-        <th>Bags Available</th>
-      </tr>
-    </thead>
-    <tbody id="stockBody">
-      <tr><td colspan="2">Loading...</td></tr>
-    </tbody>
-  </table>
+<h1>Heritage Fishing Co. — Feed Tracker</h1>
 
-  <!-- Add Feed Usage Form -->
-  <h2>Record Feed Usage</h2>
-  <form id="usageForm">
-    <input type="text" id="feedName" placeholder="Feed Name" required>
-    <input type="number" id="amountUsed" placeholder="Amount Used (bags)" required>
-    <button type="submit">Submit Usage</button>
-  </form>
+<!-- Add Received Feed Form -->
+<h2>Add Received Feed</h2>
+<form id="addStockForm">
+  <input type="text" id="newFeedName" placeholder="Feed Name (e.g., optiline_4mm)" required>
+  <input type="number" id="newFeedBags" placeholder="Bags Received" required>
+  <button type="submit">Add Stock</button>
+</form>
 
-  <script>
-    const SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AWDtjMWxbK8ssEix4IQTxco5abFN8vKv2dQq9XyuKjKMUuMZkf9tyAPk7WRzCJKI_QYpRQXgpvw2hXbHCVIu-NN6yI-F1vpF9gfruL0IiXUHyV83FQdLvuvBm13dbksuVK71E2YauxBSkwE7iWUqEoPQn8OzL_mHc8Sx0wn72FMAjAvW1kCvh6UamCS6rH-fKG4SkAU1Y662fKl2Wk-r1qYHg7FuT5PxYyraqHqFpWGmmo9lM4ohnaTVtYB0MLmNwA6FUOfaripCdHVqHTDNnivNe2SlDEPFpdd98Xw0Uyd8RP6oeLdx2cM&lib=MJCRb-wQ8faR_B5lRbFru26VCeBv4GP1Z";
+<!-- Record Feed Usage Form -->
+<h2>Record Feed Usage</h2>
+<form id="usageForm">
+  <input type="text" id="feedName" placeholder="Feed Name" required>
+  <input type="number" id="bagsUsed" placeholder="Bags Used" required>
+  <button type="submit">Record Usage</button>
+</form>
 
-    // Fetch stock from Apps Script
-    async function loadStock() {
-      try {
-        const response = await fetch(`${SCRIPT_URL}?action=getStock`);
-        const data = await response.json();
-        const tbody = document.getElementById('stockBody');
-        if (!data.stock || data.stock.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="2">No stock available</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = data.stock.map(item => `
-          <tr>
-            <td>${item.feedName}</td>
-            <td>${item.bags}</td>
-          </tr>
-        `).join('');
-      } catch (err) {
-        console.error("Error loading stock:", err);
-        document.getElementById('stockBody').innerHTML = `<tr><td colspan="2">Error loading stock</td></tr>`;
-      }
-    }
+<!-- Stock Table -->
+<h2>Current Stock</h2>
+<table id="stockTable">
+  <thead>
+    <tr>
+      <th>Feed Name</th>
+      <th>Bags in Stock</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Stock will be loaded here -->
+  </tbody>
+</table>
 
-    // Submit feed usage to Apps Script
-    document.getElementById('usageForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const feedName = document.getElementById('feedName').value.trim();
-      const amount = parseFloat(document.getElementById('amountUsed').value);
+<script>
+const SCRIPT_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AWDtjMWxbK8ssEix4IQTxco5abFN8vKv2dQq9XyuKjKMUuMZkf9tyAPk7WRzCJKI_QYpRQXgpvw2hXbHCVIu-NN6yI-F1vpF9gfruL0IiXUHyV83FQdLvuvBm13dbksuVK71E2YauxBSkwE7iWUqEoPQn8OzL_mHc8Sx0wn72FMAjAvW1kCvh6UamCS6rH-fKG4SkAU1Y662fKl2Wk-r1qYHg7FuT5PxYyraqHqFpWGmmo9lM4ohnaTVtYB0MLmNwA6FUOfaripCdHVqHTDNnivNe2SlDEPFpdd98Xw0Uyd8RP6oeLdx2cM&lib=MJCRb-wQ8faR_B5lRbFru26VCeBv4GP1Z";
 
-      if (!feedName || isNaN(amount) || amount <= 0) return alert("Enter valid values");
-
-      const payload = { action: "recordUsage", feedName, amount };
-
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: { "Content-Type": "application/json" }
-        });
-        const result = await response.json();
-        alert(result.message || "Usage recorded successfully!");
-        document.getElementById('usageForm').reset();
-        loadStock(); // Refresh table
-      } catch (err) {
-        console.error("Error recording usage:", err);
-        alert("Failed to record usage");
-      }
+// Function to load stock table
+async function loadStock() {
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=getStock");
+    const data = await res.json();
+    const tbody = document.querySelector("#stockTable tbody");
+    tbody.innerHTML = "";
+    data.forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${item.feedName}</td><td>${item.bags}</td>`;
+      tbody.appendChild(tr);
     });
+  } catch (err) {
+    console.error("Error loading stock:", err);
+    alert("Failed to load stock.");
+  }
+}
 
-    // Load stock on page load
-    window.onload = loadStock;
-  </script>
+// Add new stock
+document.getElementById('addStockForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const feedName = document.getElementById('newFeedName').value.trim().toLowerCase();
+  const bags = parseFloat(document.getElementById('newFeedBags').value);
+  if (!feedName || isNaN(bags) || bags <= 0) return alert("Enter valid feed name and bags");
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "addStock", feedName, bags }),
+      headers: { "Content-Type": "application/json" }
+    });
+    const result = await response.json();
+    alert(result.message || "Stock added successfully!");
+    document.getElementById('addStockForm').reset();
+    loadStock();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to add stock.");
+  }
+});
+
+// Record feed usage
+document.getElementById('usageForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const feedName = document.getElementById('feedName').value.trim().toLowerCase();
+  const bagsUsed = parseFloat(document.getElementById('bagsUsed').value);
+  if (!feedName || isNaN(bagsUsed) || bagsUsed <= 0) return alert("Enter valid feed and bags used");
+
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "recordUsage", feedName, bagsUsed }),
+      headers: { "Content-Type": "application/json" }
+    });
+    const result = await response.json();
+    if(result.error) return alert(result.error);
+    alert(result.message || "Usage recorded successfully!");
+    document.getElementById('usageForm').reset();
+    loadStock();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to record usage.");
+  }
+});
+
+// Load stock table on page load
+loadStock();
+</script>
 </body>
 </html>
